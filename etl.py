@@ -11,7 +11,8 @@ config.read('dl.cfg')
 
 os.environ['AWS_ACCESS_KEY_ID']=config['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
-
+key = os.getenv("AWS_ACCESS_KEY_ID")
+secret = os.getenv("AWS_SECRET_ACCESS_KEY")
 
 def create_spark_session():
     spark = SparkSession \
@@ -19,14 +20,17 @@ def create_spark_session():
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
         .getOrCreate()
     return spark
+    
+
+    
 
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data = 
+    song_data = input_data
     
     # read song data file
-    df = 
+    df = spark.read.load(song_data)
 
     # extract columns to create songs table
     songs_table = 
@@ -52,10 +56,10 @@ def process_log_data(spark, input_data, output_data):
     df = 
 
     # extract columns for users table    
-    artists_table = 
+    users_table = 
     
     # write users table to parquet files
-    artists_table
+    users_table =
 
     # create timestamp column from original timestamp column
     get_timestamp = udf()
@@ -83,6 +87,8 @@ def process_log_data(spark, input_data, output_data):
 
 def main():
     spark = create_spark_session()
+    spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.access.key", key)
+    spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret)
     input_data = "s3a://udacity-dend/"
     output_data = ""
     

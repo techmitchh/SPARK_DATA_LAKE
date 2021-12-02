@@ -53,13 +53,13 @@ def process_log_data(spark, input_data, output_data):
     df = spark.read.load(log_data)
     
     # filter by actions for song plays
-    df = 
+    df = df.select('*').filter(df.page == 'NextSong')
 
     # extract columns for users table    
-    users_table = 
+    users_table = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
     
     # write users table to parquet files
-    users_table =
+    users_table = users_table.write.save(output_data+'users', format = 'Parquet', header = True)
 
     # create timestamp column from original timestamp column
     get_timestamp = udf()

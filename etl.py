@@ -27,30 +27,30 @@ def create_spark_session():
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data = input_data
+    song_data = input_data + 'song_data/A/A/A/'
     
     # read song data file
     df = spark.read.load(song_data)
 
     # extract columns to create songs table
-    songs_table = song_data[['song_id', 'title', 'artist_id', 'year','duration']]
+    songs_table = df[['song_id', 'title', 'artist_id', 'year','duration']]
     
     # write songs table to parquet files partitioned by year and artist
-    songs_table.write.mode("overwrite").partitionBy("year", "artist_id").parquet("songs.parquet")
+    songs_table.write.save(output_data+'songs', format = 'Parquet', header = True).partitionBy("year", "artist_id")
 
     # extract columns to create artists table
-    artists_table = song_data[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']]
+    artists_table = df[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']]
     
     # write artists table to parquet files
-    artists_table.write.mode("overwrite").parquet("artists.parquet")
+    artists_table.write.save(output_data+'artists', format = 'Parquet', header = True)
 
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data =
+    log_data = input_data + 'log_data/'
 
     # read log data file
-    df = 
+    df = spark.read.load(log_data)
     
     # filter by actions for song plays
     df = 
@@ -90,7 +90,7 @@ def main():
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.access.key", key)
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret)
     input_data = "s3a://udacity-dend/"
-    output_data = ""
+    output_data = "s3a://techlake/output/"
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)

@@ -4,7 +4,7 @@ import os
 from pyspark.sql.types import TimestampType, DateType
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
-from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
+from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, dayofweek, date_format
 
 
 config = configparser.ConfigParser()
@@ -60,21 +60,25 @@ def process_log_data(spark, input_data, output_data):
     users_table = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
     
     # write users table to parquet files
-    users_table = users_table.write.save(output_data+'users', format = 'Parquet', header = True)
+    users_table.write.save(output_data+'users', format = 'Parquet', header = True)
 
     # create timestamp column from original timestamp column
     get_timestamp = udf(lambda x: datetime.fromtimestamp(int(int(x) / 1000)), TimestampType())
     df = df.select('*', get_timestamp(log_data.ts).alias('start_time'))
     
-    # create datetime column from original timestamp column
-    get_datetime = udf()
-    df = 
-    
     # extract columns to create time table
-    time_table = 
+    time_table = df.select(
+                        date_format('start_time', 'HH:mm:ss').alias('start_time'),\
+                        hour('start_time').alias('hour'),\
+                        dayofmonth('start_time').alias('day'),\
+                        weekofyear('start_time').alias('week'),\
+                        month('start_time').alias('month'),\
+                        year('start_time').alias('year'),\
+                        dayofweek('start_time').alias('weekday')
+                        )
     
     # write time table to parquet files partitioned by year and month
-    time_table
+    time_table.write.save(output_data+'time', format = 'Parquet', header = True)
 
     # read in song data to use for songplays table
     song_df = 

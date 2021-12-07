@@ -1,4 +1,4 @@
+*.ipynb
 *.cfg
 test.ipynb
 *.parquet
-spark-emr.ipynb

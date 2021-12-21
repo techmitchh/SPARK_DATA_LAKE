@@ -60,7 +60,7 @@ def process_log_data(spark, input_data, output_data):
     users_table = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
     
     # write users table to parquet files
-    users_table.write.save(output_data+'users', format = 'Parquet', header = True)
+    users_table.write.mode("overwrite").parquet("s3a://techmitch/sparkify_lake/users.parquet")
 
     # create timestamp column from original timestamp column
     get_timestamp = udf(lambda x: datetime.fromtimestamp(int(int(x) / 1000)), TimestampType())
@@ -78,7 +78,7 @@ def process_log_data(spark, input_data, output_data):
                         year('start_time').alias('year'),\
                         dayofweek('start_time').alias('weekday')
                         )
-    time_table.write.partitionBy('year','month').mode("overwrite").parquet("time.parquet") # write time table to parquet files partitioned by year and month
+    time_table.write.partitionBy('year','month').mode("overwrite").parquet("s3a://techmitch/sparkify_lake/time.parquet") # write time table to parquet files partitioned by year and month
 
 
     # read in song data to use for songplays table
@@ -114,7 +114,7 @@ def process_log_data(spark, input_data, output_data):
                             ON l.artist = st.artist
                          WHERE l.page = "NextSong"
                       ORDER BY song_id DESC
-                      ''').write.partitionBy('year','month').mode("overwrite").parquet("songplay.parquet")# write songplays table to parquet files partitioned by year and month
+                      ''').write.partitionBy('year','month').mode("overwrite").parquet("s3a://techmitch/sparkify_lake/songplay.parquet") # write songplays table to parquet files partitioned by year and month
 
 def main():
     spark = create_spark_session()
